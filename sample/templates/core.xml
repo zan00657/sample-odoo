@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+
+    <!-- This template contains all the assets related for the website   -->
+    <template id="core_assets" name="Core Assets" >
+        <!--  All CSS      -->
+        <link href="/sample/static/lib/css/bootstrap.min.css" rel="stylesheet" type="text/css"></link>
+        <link href="/sample/static/css/core.css" rel="stylesheet" type="text/css"></link>
+
+        <!-- ALL JS -->
+        <script src="/sample/static/lib/js/jquery-3.5.1.min.js"></script>
+        <script src="/sample/static/lib/js/bootstrap.min.js"></script>
+        <script src="/sample/static/lib/js/underscore-min.js"></script>
+        <script src="/sample/static/js/core.js"></script>
+    </template>
+
+    <!-- This is the main layout used for the whole website   -->
+    <template id="sample.layout" name="Sample Common layout">
+        <html t-att="html_data or {}">
+            <head>
+                <meta charset="utf-8"/>
+                <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+                <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
+
+                <title t-esc="title"/>
+                <meta name="title" t-att-content="title" />
+                <meta name="description" t-att-content="title" />
+
+                <t t-call-assets="sample.core_assets" t-js="false"/>
+                <t t-raw="head or ''"/>
+            </head>
+            <body>
+                <div class="main_outer">
+                    <t t-call="sample.header" />
+                    <main>
+                        <t t-raw="0"/>
+                    </main>
+                    <t t-call="sample.footer" />
+                </div>
+                <t t-call-assets="sample.core_assets" t-css="false"/>
+            </body>
+        </html>
+    </template>
+
+    <template id="sample.header" name="Header" >
+        <nav class="navbar navbar-expand-lg fixed-top navbar-dark bg-dark">
+          <a class="navbar-brand" href="/">Confianz</a>
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+            <div class="navbar-nav">
+              <a class="nav-item nav-link active" href="/">Home <span class="sr-only">(current)</span></a>
+              <a class="nav-item nav-link" href="/shop">Shop</a>
+            </div>
+          </div>
+        </nav>
+    </template>
+
+    <template id="sample.footer" name="Footer" >
+        <footer class="bg-dark footer container-fluid text-center">
+        </footer>
+    </template>
+
+    <!-- This template is for the product template page  -->
+    <template id="sample.product" name="Product" >
+        <t t-call="sample.layout">
+            <div class="container-fluid">
+              <div class="row content">
+                  <div class="col-sm-12">
+                      <nav aria-label="breadcrumb">
+                          <ol class="breadcrumb">
+                              <li class="breadcrumb-item">
+                                  <a href="/">Home</a>
+                              </li>
+                              <li class="breadcrumb-item">
+                                  <a t-att-href="keep(category=0)">Products</a>
+                              </li>
+                              <li class="breadcrumb-item" t-if="category">
+                                  <a t-att-href="keep('/shop/category/%s' % slug(category), category=0)"
+                                     t-field="category.name" />
+                              </li>
+                              <li class="breadcrumb-item active" aria-current="page"><span t-field="product.name" /></li>
+                          </ol>
+                      </nav>
+                  </div>
+                  <div class="col-sm-8">
+                      <div class="container">
+                          <div class="row justify-content-center align-items-center">
+                            <span itemprop="image" t-attf-content="{{request.httprequest.url_root}}web/image/product.template/{{product.id}}/image" t-field="product.image" t-options="{'widget': 'image', 'class': 'product_detail_img product-image', 'alt-field': 'name', 'zoom': 'image'}"/>
+                        </div>
+                      </div>
+                  </div>
+                  <div class="col-sm-3 border-inset">
+                      <h1 itemprop="name" t-field="product.name">Product Name</h1>
+                      <span itemprop="url" style="display:none;" t-esc="'%sshop/product/%s' % (request.httprequest.url_root, slug(product))"/>
+                      <form action="/shop/cart/update" class="js_add_cart_variants" method="POST">
+                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()" />
+                            <div class="js_product" t-if="product.product_variant_ids">
+                                <t t-placeholder="select">
+                                    <input type="hidden" class="product_id" name="product_id" t-att-value="product.product_variant_id.id if len(product.product_variant_ids) == 1 else '0'" />
+                                    <t t-call="website_sale.variants">
+                                        <t t-set="ul_class" t-value="'nav-stacked'" />
+                                    </t>
+                                </t>
+                                <t t-call="website_sale.product_price" />
+
+                                <p t-if="len(product.product_variant_ids) &gt; 1" class="css_not_available_msg bg-danger combination_error" style="padding: 15px;">Sorry, This is currently unavailable.</p>
+                                <a id="add_to_cart" class="btn btn-primary btn-lg mt8 js_check_product a-submit" href="#">Add to Cart</a>
+                            </div>
+                      </form>
+                      <hr t-if="product.description_sale" />
+                            <div class="o_not_editable">
+                                <p t-field="product.description_sale" class="text-muted" />
+                            </div>
+                            <hr />
+                            <p class="text-muted">
+                              30-day money-back guarantee<br />
+                              Free Shipping in U.S.<br />
+                              Buy now, get in 2 days
+                            </p>
+                  </div>
+              </div>
+            </div>
+        </t>
+    </template>
+
+</odoo>
